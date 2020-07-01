@@ -1,0 +1,4 @@
+git+git://github.com/patrickjmcd/kcwater
+git+git://github.com/patrickjmcd/kcpl
+influxdb
+requests

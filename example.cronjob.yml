@@ -1,0 +1,58 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: utilities-fetcher
+spec:
+  schedule: "0 12 * * *"
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          imagePullSecrets:
+            - name: registry-cred
+          containers:
+            - name: kc-utilities
+              image: registry.pmcd.io/kc-utilities:latest
+              env:
+                - name: INFLUXDB_ADDRESS
+                  valueFrom:
+                    secretKeyRef:
+                      name: influxdb-secret
+                      key: influxdb-server
+                - name: INFLUXDB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: influxdb-secret
+                      key: influxdb-username
+                - name: INFLUXDB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: influxdb-secret
+                      key: influxdb-password
+                - name: KCPL_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: kc-utilities
+                      key: kcpl-username
+                - name: KCPL_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: kc-utilities
+                      key: kcpl-username
+                - name: KCPL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: kc-utilities
+                      key: kcpl-password
+                - name: KCWATER_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: kc-utilities
+                      key: kcwater-username
+                - name: KCWATER_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: kc-utilities
+                      key: kcwater-password
+          restartPolicy: OnFailure
