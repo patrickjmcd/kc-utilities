@@ -87,6 +87,17 @@ def write_to_influxdb(client, influx_database, data):
     print('Data written to InfluxDB')
 
 
+def convert_water_usage(d):
+    if d['billedCharge']:
+        d['billedCharge'] = float(d['billedCharge'])
+    if d['billedConsumption']:
+        d['billedConsumption'] = float(d['billedConsumption'])
+    d['gallonsConsumption'] = float(d['gallonsConsumption'])
+    d['rawConsumption'] = float(d['rawConsumption'])
+    d['scaledRead'] = float(d['scaledRead'])
+    return d
+
+
 def main():
     [influx_client, influx_db] = get_influx_client()
     creds = get_credentials()
@@ -104,7 +115,8 @@ def main():
         kcpl_points = [
             {
                 'measurement': 'energy_usage',
-                'fields': kcpl_data[-2]
+                'fields': kcpl_data[-2],
+                'time': kcpl_data[-2]['billDate']
             }
         ]
         write_to_influxdb(influx_client, influx_db, kcpl_points)
@@ -112,23 +124,26 @@ def main():
         print("Unable to get kcpl data")
         print(e)
 
-    try:
-        kcwater_client = kcwater.KCWater(
-            creds['kcwater']['username'], creds['kcwater']['password'])
+    # try:
+    kcwater_client = kcwater.KCWater(
+        creds['kcwater']['username'], creds['kcwater']['password'])
 
-        kcwater_client.login()
-        kcwater_data = kcwater_client.get_usage_daily()
-        print("Last water usage data: " + str(kcwater_data[-1]))
-        kcwater_points = [
-            {
-                'measurement': 'water_usage',
-                'fields': kcwater_data[-1]
-            }
-        ]
-        write_to_influxdb(influx_client, influx_db, kcwater_points)
-    except Exception as e:
-        print("Unable to get kcwater data")
-        print(e)
+    kcwater_client.login()
+    kcwater_data = kcwater_client.get_usage_daily()
+    print("Last water usage data: " + str(kcwater_data[-1]))
+    chargeDate = kcwater_data[-1]['chargeDateRaw'] + "T00:00:00Z"
+    kc_water_obj = convert_water_usage(kcwater_data[-1])
+    kcwater_points = [
+        {
+            'measurement': 'water_usage',
+            'fields': kc_water_obj,
+            'time': chargeDate
+        }
+    ]
+    write_to_influxdb(influx_client, influx_db, kcwater_points)
+    # except Exception as e:
+    #     print("Unable to get kcwater data")
+    #     print(e)
 
 
 if __name__ == "__main__":
