@@ -29,7 +29,7 @@ jobs:
           echo ::set-output name=build_date::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo ::set-output name=docker_platforms::linux/amd64,linux/arm64,linux/arm/v6
           echo ::set-output name=docker_username::patrickjmcd
-          echo ::set-output name=docker_image::registry.pmcd.io/kc-utilities
+          echo ::set-output name=docker_image::patrickjmcd/kc-utilities
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -58,7 +58,7 @@ jobs:
         env:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo "${DOCKER_PASSWORD}" | docker login registry.pmcd.io --username "${{ steps.prepare.outputs.docker_username }}" --password-stdin
+          echo "${DOCKER_PASSWORD}" | docker login --username "${{ steps.prepare.outputs.docker_username }}" --password-stdin
 
       - name: Docker Buildx (push)
         if: success() && startsWith(github.ref, 'refs/tags/')
