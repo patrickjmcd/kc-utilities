@@ -1,9 +1,7 @@
-FROM python:alpine
+FROM python:3
 
-VOLUME /src/
-COPY kc-utilities.py requirements.txt /src/
-WORKDIR /src
-RUN apk add --no-cache git
+WORKDIR /app
+ADD kc_utilities .
 RUN pip install -r requirements.txt
 
-CMD ["python", "-u", "/src/kc-utilities.py"]
+CMD ["python3", "main.py"]

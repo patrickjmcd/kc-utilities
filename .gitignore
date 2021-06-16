@@ -1,1 +1,5 @@
+venv/*
+.vscode/*
 .env*
+*output.json
+*secondary.json
